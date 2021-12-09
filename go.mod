@@ -1,3 +1,3 @@
-module macaddress_utils
+module github.com/OlegPowerC/macaddress_utils
 
 go 1.13
