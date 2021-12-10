@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -95,4 +96,29 @@ func SNMPMACtoHexStringFromByteArray(bytearray []byte, delimiterpattern int) (er
 		return errors.New("Invalid delimiter index"), ""
 	}
 	return nil, retstring
+}
+
+func HEXStringTo6Bytes(Hexstring string) (err error, MacAddr [6]byte) {
+	var MacAddrResult [6]byte
+	MACstring := strings.ToLower(Hexstring)
+	MACstring = strings.ReplaceAll(MACstring, "-", "")
+	MACstring = strings.ReplaceAll(MACstring, ".", "")
+	MACstring = strings.ReplaceAll(MACstring, ":", "")
+	matched, matcherr := regexp.MatchString(`^[0-9a-f]{12}$`, MACstring)
+	if matcherr == nil && matched {
+		MacInBytes, MacInBytesErr := hex.DecodeString(MACstring)
+		if MacInBytesErr != nil {
+			return MacInBytesErr, MacAddrResult
+		}
+		if len(MacInBytes) != 6 {
+			return fmt.Errorf("Error in len of the MAC addrress"), MacAddrResult
+		} else {
+			for Bcounter, Cbyte := range MacInBytes {
+				MacAddrResult[Bcounter] = Cbyte
+			}
+			return nil, MacAddrResult
+		}
+	} else {
+		return fmt.Errorf("Error in MAC addrress string"), MacAddrResult
+	}
 }
